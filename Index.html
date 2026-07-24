@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Congleton Dog Rescue - Meet Our Dogs</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+<h1>Meet Our Dogs</h1>
+<p>
+Find a dog that matches your home, lifestyle and family.
+</p>
+</header>
+
+
+<section class="filters">
+
+<select id="breed">
+<option value="">All Breeds</option>
+</select>
+
+
+<select id="size">
+<option value="">All Sizes</option>
+<option>Small</option>
+<option>Medium</option>
+<option>Large</option>
+</select>
+
+
+<select id="age">
+<option value="">All Ages</option>
+<option>Puppy</option>
+<option>Adult</option>
+<option>Senior</option>
+</select>
+
+
+<select id="sex">
+<option value="">All Sexes</option>
+<option>Male</option>
+<option>Female</option>
+</select>
+
+
+<select id="energy">
+<option value="">Any Energy Level</option>
+<option>Low</option>
+<option>Medium</option>
+<option>High</option>
+</select>
+
+
+<select id="children">
+<option value="">Children Friendly?</option>
+<option>Yes</option>
+<option>No</option>
+</select>
+
+
+<select id="dogs">
+<option value="">Dog Friendly?</option>
+<option>Yes</option>
+<option>No</option>
+</select>
+
+
+<select id="cats">
+<option value="">Cat Friendly?</option>
+<option>Yes</option>
+<option>No</option>
+</select>
+
+
+<button onclick="clearFilters()">
+Clear Filters
+</button>
+
+
+</section>
+
+
+<div id="dogCount"></div>
+
+
+<section id="dogContainer" class="dog-grid">
+
+</section>
+
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
