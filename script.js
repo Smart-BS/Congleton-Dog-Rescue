@@ -1,198 +1,185 @@
-const dogs = [
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTl1rPGVMDaFoZ03k-HGBK6Aiyb-IZ4jU51oMwz3k-K8uvgLv4dFdQT_OyNrvDqs2OIXLivdv8lymlb/pub?gid=0&single=true&output=csv";
 
-{
-name: "Bella",
-breed: "Labrador Cross",
-size: "Medium",
-age: "Adult",
-sex: "Female",
-energy: "Medium",
-children: "Yes",
-dogs: "Yes",
-cats: "No",
-image: "https://images.unsplash.com/photo-1552053831-71594a27632d",
-description: "Bella is a loving and friendly Labrador Cross looking for her forever home.",
-idealHome: "A family home with time for walks, attention and companionship."
-},
-
-{
-name: "Max",
-breed: "Staffordshire Bull Terrier",
-size: "Medium",
-age: "Adult",
-sex: "Male",
-energy: "High",
-children: "Yes",
-dogs: "No",
-cats: "No",
-image: "https://images.unsplash.com/photo-1530281700549-e82e7bf110d6",
-description: "Max is an energetic and affectionate dog who loves being around people.",
-idealHome: "An active home that can provide plenty of exercise and enrichment."
-},
-
-{
-name: "Luna",
-breed: "Cockapoo",
-size: "Small",
-age: "Puppy",
-sex: "Female",
-energy: "High",
-children: "Yes",
-dogs: "Yes",
-cats: "Yes",
-image: "https://images.unsplash.com/photo-1583512603805-3cc6b41f3edb",
-description: "Luna is a playful young dog looking for a family ready for puppy adventures.",
-idealHome: "A home willing to continue training and socialisation."
-},
-
-{
-name: "Charlie",
-breed: "Greyhound Cross",
-size: "Large",
-age: "Senior",
-sex: "Male",
-energy: "Low",
-children: "Yes",
-dogs: "Yes",
-cats: "Yes",
-image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b",
-description: "Charlie is a gentle older dog who enjoys relaxed walks and home comforts.",
-idealHome: "A quieter home where he can enjoy his retirement."
-}
-
-];
-
-
+let dogs = [];
 
 const filters = [
-"breed",
-"size",
-"age",
-"sex",
-"energy",
-"children",
-"dogs",
-"cats"
+  "breed",
+  "size",
+  "age",
+  "sex",
+  "energy",
+  "children",
+  "dogs",
+  "cats"
 ];
-
-
 
 const dogContainer = document.getElementById("dogContainer");
 const dogCount = document.getElementById("dogCount");
 
 
+async function loadDogs() {
 
-function loadBreeds(){
+  const response = await fetch(sheetURL);
+  const csv = await response.text();
 
-const breedSelect = document.getElementById("breed");
+  const rows = csv.split("\n");
 
-const breeds = [...new Set(dogs.map(dog => dog.breed))];
+  const headers = rows[0]
+    .split(",")
+    .map(header => header.trim());
 
 
-breeds.forEach(breed => {
+  dogs = rows.slice(1)
+    .filter(row => row.trim() !== "")
+    .map(row => {
 
-let option = document.createElement("option");
+      const values = row.split(",");
 
-option.value = breed;
-option.textContent = breed;
+      let dog = {};
 
-breedSelect.appendChild(option);
+      headers.forEach((header, index) => {
+        dog[header] = values[index]?.trim() || "";
+      });
 
-});
+      return dog;
+
+    });
+
+
+  populateBreeds();
+  displayDogs();
 
 }
 
 
 
+function populateBreeds(){
+
+  const breedSelect = document.getElementById("breed");
+
+  const breeds = [
+    ...new Set(
+      dogs.map(dog => dog.Breed)
+      .filter(Boolean)
+    )
+  ];
+
+
+  breeds.forEach(breed => {
+
+    const option = document.createElement("option");
+
+    option.value = breed;
+    option.textContent = breed;
+
+    breedSelect.appendChild(option);
+
+  });
+
+}
+
+
 
 function displayDogs(){
 
-
-dogContainer.innerHTML = "";
-
-
-let results = dogs.filter(dog => {
+  dogContainer.innerHTML = "";
 
 
-return filters.every(filter => {
+  const results = dogs.filter(dog => {
 
 
-let selected =
-document.getElementById(filter).value;
+    if(dog.Status && dog.Status.toLowerCase() !== "available"){
+      return false;
+    }
 
 
-return selected === "" || dog[filter] === selected;
+    return filters.every(filter => {
 
 
-});
+      const selected =
+        document.getElementById(filter).value;
 
 
-});
+      if(selected === ""){
+        return true;
+      }
+
+
+      const sheetValue =
+        dog[filter.charAt(0).toUpperCase() + filter.slice(1)];
+
+
+      return sheetValue === selected;
+
+
+    });
+
+
+  });
 
 
 
-dogCount.textContent =
-`${results.length} dog${results.length !== 1 ? "s" : ""} available`;
+  dogCount.textContent =
+  ${results.length} dog${results.length !== 1 ? "s" : ""} available;
 
 
 
-results.forEach(dog => {
+  results.forEach(dog => {
 
 
-let card = document.createElement("div");
+    const card = document.createElement("div");
 
-card.className = "dog-card";
-
-
-card.innerHTML = `
-
-<img src="${dog.image}" alt="${dog.name}">
+    card.className = "dog-card";
 
 
-<div class="dog-info">
+    card.innerHTML = `
 
-<h2>${dog.name}</h2>
-
-<p>${dog.breed}</p>
+    <img src="${dog.Photo}" alt="${dog.Name}">
 
 
-<span class="tag">${dog.size}</span>
-<span class="tag">${dog.age}</span>
-<span class="tag">${dog.sex}</span>
+    <div class="dog-info">
 
-<br>
+    <h2>${dog.Name}</h2>
 
-<span class="tag">
-Energy: ${dog.energy}
-</span>
+    <p>${dog.Breed}</p>
 
-<span class="tag">
-Children: ${dog.children}
-</span>
+    <span class="tag">${dog.Size}</span>
+    <span class="tag">${dog.Age}</span>
+    <span class="tag">${dog.Sex}</span>
 
-<span class="tag">
-Dogs: ${dog.dogs}
-</span>
+    <br>
 
-<span class="tag">
-Cats: ${dog.cats}
-</span>
+    <span class="tag">
+    Energy: ${dog.Energy}
+    </span>
 
+    <span class="tag">
+    Children: ${dog.Children}
+    </span>
 
-<div class="profile-button">
-View ${dog.name}'s Profile
-</div>
+    <span class="tag">
+    Dogs: ${dog.Dogs}
+    </span>
 
-
-</div>
-
-`;
+    <span class="tag">
+    Cats: ${dog.Cats}
+    </span>
 
 
-dogContainer.appendChild(card);
+    <div class="profile-button">
+    View ${dog.Name}'s Profile
+    </div>
 
 
-});
+    </div>
+
+    `;
+
+
+    dogContainer.appendChild(card);
+
+
+  });
 
 
 }
@@ -215,7 +202,6 @@ displayDogs();
 
 
 
-
 filters.forEach(filter => {
 
 document
@@ -225,13 +211,10 @@ document
 });
 
 
-
 document
 .getElementById("clearFilters")
 .addEventListener("click", clearFilters);
 
 
 
-loadBreeds();
-
-displayDogs();
+loadDogs();
