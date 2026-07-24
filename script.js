@@ -3,87 +3,58 @@ let dogs = [];
 const dogContainer = document.getElementById("dogContainer");const dogCount = document.getElementById("dogCount");
 const filters = ["breed","size","age","sex","energy","children","dogs","cats"];
 
-async function loadDogs(){
-const response = await fetch(sheetURL);
-const csv = await response.text();
-const rows = csv.split(/\r?\n/);
-const headers = rows[0].split(",").map(h => h.trim());
+async function loadDogs() {
+    const response = await fetch(sheetURL);    const csv = await response.text();
+    const lines = csv.split("\n");
+    const headers = lines[0]        .split(",")        .map(x => x.trim());
 
-dogs = rows.slice(1).filter(row => row.trim() !== "").map(row => {
-let values = row.split(",");
-let dog = {};
-headers.forEach((header,index)=>{dog[header] = values[index]?.trim() || "";});
-return dog;
-});
+    dogs = lines.slice(1)        .filter(x => x.trim() !== "")        .map(line => {
+            const values = line.split(",");
+            let dog = {};
+            headers.forEach((header, index) => {                dog[header] = values[index] ? values[index].trim() : "";            });
+            return dog;
+        });
 
-console.log(dogs);
-populateBreeds();
-displayDogs();
+    console.log("Loaded dogs:", dogs);
+    createBreedList();
+    displayDogs();
 }
 
 
-function populateBreeds(){
-const breedSelect = document.getElementById("breed");
-const breeds = [...new Set(dogs.map(dog=>dog.Breed).filter(Boolean))];
+function createBreedList() {
+    const breed =    document.getElementById("breed");
 
-breeds.forEach(breed=>{
-let option=document.createElement("option");
-option.value=breed;
-option.textContent=breed;
-breedSelect.appendChild(option);
-});
+    [...new Set(dogs.map(d => d.Breed))]    .filter(Boolean)    .forEach(item => {
+        let option =        document.createElement("option");
+        option.value = item;        option.textContent = item;
+        breed.appendChild(option);
+    });
 }
 
 
-function displayDogs(){
-dogContainer.innerHTML="";
+function displayDogs() {
+    dogContainer.innerHTML = "";
+    let availableDogs = dogs.filter(dog => {
+        return !dog.Status ||        dog.Status.toLowerCase() === "available";
+    });
 
-let results = dogs.filter(dog=>{
+    dogCount.textContent =    availableDogs.length + " dogs available";
 
-if(dog.Status &&dog.Status.toLowerCase() !== "available"){return false;}
+    availableDogs.forEach(dog => {
 
-return filters.every(filter=>{
+        let card =        document.createElement("div");
 
-let selected =document.getElementById(filter).value;
+        card.className = "dog-card";
 
-if(selected===""){return true;}
+        card.innerHTML = `        <img src="${dog.Photo || ""}">        <div class="dog-info">        <h2>${dog.Name}</h2>        <p>${dog.Breed}</p>        <span class="tag">${dog.Size}</span>        <span class="tag">${dog.Age}</span>        <span class="tag">${dog.Sex}</span>        <p>        Energy: ${dog.Energy}<br>        Children: ${dog.Children}<br>        Dogs: ${dog.Dogs}<br>        Cats: ${dog.Cats}        </p>        </div>        `;
 
-let field =filter.charAt(0).toUpperCase()+filter.slice(1);
-
-return dog[field] === selected;
-
-});
-
-});
-
-
-dogCount.textContent =`${results.length} dog${results.length !== 1 ? "s" : ""} available`;
-
-
-results.forEach(dog=>{
-
-let card=document.createElement("div");
-card.className="dog-card";
-
-card.innerHTML=`
-<img src="${dog.Photo}" alt="${dog.Name}">
-<div class="dog-info">
-<h2>${dog.Name}</h2>
-<p>${dog.Breed}</p>
-<span class="tag">${dog.Size}</span><span class="tag">${dog.Age}</span><span class="tag">${dog.Sex}</span>
-<p>Energy: ${dog.Energy}<br>Children: ${dog.Children}<br>Dogs: ${dog.Dogs}<br>Cats: ${dog.Cats}</p>
-</div>
-`;
-
-dogContainer.appendChild(card);
-
-});
-
+        dogContainer.appendChild(card);
+    });
 }
 
 
-filters.forEach(filter=>{
-document.getElementById(filter).addEventListener("change",displayDogs);
+filters.forEach(filter => {
+    document    .getElementById(filter)    .addEventListener("change", displayDogs);
 });
 
 loadDogs();
