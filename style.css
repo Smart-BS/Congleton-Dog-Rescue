@@ -96,7 +96,7 @@ header p {
 
 
 
-/* Count */
+/* Dog Count */
 
 #dogCount {
 
@@ -135,18 +135,47 @@ header p {
     box-shadow: 0 6px 18px rgba(47,17,105,0.15);
     display: flex;
     flex-direction: column;
+    transition: all 0.3s ease;
 
 }
 
 
 
-/* Photo */
+/* Hover effect */
+
+.dog-grid:hover .dog-card {
+
+    opacity: 0.65;
+    filter: grayscale(25%);
+
+}
+
+
+.dog-grid .dog-card:hover {
+
+    opacity: 1;
+    filter: grayscale(0%);
+    border: 3px solid #2F1169;
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(47,17,105,0.35);
+
+}
+
+
+
+/* Photo Area */
 
 .photo-box {
 
     width: 100%;
     height: 260px;
     background: #B0A2C2;
+    color: #2F1169;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
     flex-shrink: 0;
 
 }
@@ -201,7 +230,7 @@ header p {
 
 
 
-/* Badges */
+/* Rescue Badges */
 
 .badges {
 
@@ -352,35 +381,5 @@ header p {
         height:240px;
 
     }
-
-}
-/* Card hover focus effect */
-
-/* Slightly mute all cards when hovering over the grid */
-.dog-grid:hover .dog-card {
-
-    opacity: 0.65;
-    filter: grayscale(25%);
-    transition: all 0.3s ease;
-
-}
-
-
-/* Highlight the card being hovered */
-.dog-grid .dog-card:hover {
-
-    opacity: 1;
-    filter: grayscale(0%);
-    border: 3px solid #2F1169;
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(47,17,105,0.35);
-
-}
-
-
-/* Smooth transition */
-.dog-card {
-
-    transition: all 0.3s ease;
 
 }
