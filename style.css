@@ -354,3 +354,33 @@ header p {
     }
 
 }
+/* Card hover focus effect */
+
+/* Slightly mute all cards when hovering over the grid */
+.dog-grid:hover .dog-card {
+
+    opacity: 0.65;
+    filter: grayscale(25%);
+    transition: all 0.3s ease;
+
+}
+
+
+/* Highlight the card being hovered */
+.dog-grid .dog-card:hover {
+
+    opacity: 1;
+    filter: grayscale(0%);
+    border: 3px solid #2F1169;
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(47,17,105,0.35);
+
+}
+
+
+/* Smooth transition */
+.dog-card {
+
+    transition: all 0.3s ease;
+
+}
