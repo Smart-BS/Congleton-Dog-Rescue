@@ -6,94 +6,60 @@ const dogContainer = document.getElementById("dogContainer");
 const dogCount = document.getElementById("dogCount");
 
 
-// Convert Google Drive links
-function convertGoogleDriveImage(url){
+// Simple CSV parser
+function parseCSV(text) {
 
-    if(!url){
-        return "";
-    }
+    const lines = text.split(/\r?\n/);
 
-    if(url.includes("drive.google.com/file/d/")){
+    return lines.map(line => {
 
-        const id = url
-            .split("/d/")[1]
-            .split("/")[0];
-
-        return `https://drive.google.com/uc?export=view&id=${id}`;
-
-    }
-
-    return url;
-
-}
+        const result = [];
+        let current = "";
+        let quote = false;
 
 
-// CSV parser
-function parseCSV(text){
+        for (let i = 0; i < line.length; i++) {
 
-    const rows = [];
-    let row = [];
-    let value = "";
-    let insideQuotes = false;
+            const char = line[i];
 
+            if (char === '"') {
+                quote = !quote;
+            }
+            else if (char === "," && !quote) {
 
-    for(let char of text){
+                result.push(current);
+                current = "";
 
-        if(char === '"'){
+            }
+            else {
 
-            insideQuotes = !insideQuotes;
-
-        } else if(char === "," && !insideQuotes){
-
-            row.push(value);
-            value = "";
-
-        } else if((char === "\n" || char === "\r") && !insideQuotes){
-
-            if(row.length || value){
-
-                row.push(value);
-                rows.push(row);
+                current += char;
 
             }
 
-            row = [];
-            value = "";
-
-        } else {
-
-            value += char;
-
         }
 
-    }
+        result.push(current);
 
+        return result;
 
-    if(row.length || value){
-
-        row.push(value);
-        rows.push(row);
-
-    }
-
-
-    return rows;
+    });
 
 }
 
 
 
-async function loadDogs(){
+async function loadDogs() {
 
     const response = await fetch(sheetURL);
 
     const csv = await response.text();
 
+
     const rows = parseCSV(csv);
 
 
-    const headers = rows[0]
-        .map(header => header.trim());
+    const headers = rows[0].map(h => h.trim());
 
 
     dogs = rows.slice(1)
@@ -102,20 +68,9 @@ async function loadDogs(){
 
             let dog = {};
 
-
             headers.forEach((header,index)=>{
 
-                let value = row[index]?.trim() || "";
-
-
-                if(header === "Photo"){
-
-                    value = convertGoogleDriveImage(value);
-
-                }
-
-
-                dog[header] = value;
+                dog[header] = row[index]?.trim() || "";
 
             });
 
@@ -134,7 +89,8 @@ async function loadDogs(){
 
 
 
-function displayDogs(){
+function displayDogs() {
+
 
     dogContainer.innerHTML = "";
 
@@ -149,7 +105,12 @@ function displayDogs(){
 
 
 
-    availableDogs.forEach(dog=>{
+    availableDogs.forEach(dog => {
+
+
+        console.log("Creating card for:", dog.Name);
+        console.log("Photo:", dog.Photo);
+
 
 
         const card = document.createElement("div");
@@ -157,18 +118,20 @@ function displayDogs(){
         card.className = "dog-card";
 
 
-        const image = document.createElement("img");
 
-        image.src = dog.Photo;
+        const img = document.createElement("img");
 
-        image.alt = dog.Name;
+        img.src = dog.Photo;
+
+        img.alt = dog.Name;
 
 
-        image.onerror = function(){
+        img.onerror = () => {
 
-            this.src = "https://via.placeholder.com/400x260?text=Photo+Coming+Soon";
+            img.src = "https://via.placeholder.com/400x260?text=No+Photo";
 
         };
+
 
 
         const info = document.createElement("div");
@@ -198,7 +161,7 @@ function displayDogs(){
         `;
 
 
-        card.appendChild(image);
+        card.appendChild(img);
 
         card.appendChild(info);
 
