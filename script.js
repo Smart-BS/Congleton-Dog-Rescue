@@ -6,13 +6,15 @@ const dogContainer = document.getElementById("dogContainer");
 const dogCount = document.getElementById("dogCount");
 
 
-// Convert Google Drive links into displayable images
+// Handles Google Drive photos
 function convertGoogleDriveImage(url){
 
     if(!url){
         return "";
     }
 
+
+    // Convert normal Google Drive sharing links
     if(url.includes("drive.google.com/file/d/")){
 
         const id = url
@@ -23,12 +25,15 @@ function convertGoogleDriveImage(url){
 
     }
 
+
+    // Leave direct image links unchanged
     return url;
 
 }
 
 
-// CSV reader that handles commas inside descriptions
+
+// CSV parser
 function parseCSV(text){
 
     const rows = [];
@@ -55,7 +60,7 @@ function parseCSV(text){
         }
         else if((char === "\n" || char === "\r") && !insideQuotes){
 
-            if(value || row.length){
+            if(row.length || value){
 
                 row.push(value);
                 rows.push(row);
@@ -75,7 +80,7 @@ function parseCSV(text){
     }
 
 
-    if(value || row.length){
+    if(row.length || value){
 
         row.push(value);
         rows.push(row);
@@ -86,6 +91,7 @@ function parseCSV(text){
     return rows;
 
 }
+
 
 
 
@@ -103,7 +109,7 @@ async function loadDogs(){
 
 
     dogs = rows.slice(1)
-        .filter(row => row.length)
+        .filter(row => row.length > 1)
         .map(row => {
 
 
@@ -119,8 +125,7 @@ async function loadDogs(){
 
                 if(header === "Photo"){
 
-                    value =
-                    convertGoogleDriveImage(value);
+                    value = convertGoogleDriveImage(value);
 
                 }
 
@@ -143,6 +148,7 @@ async function loadDogs(){
     displayDogs();
 
 }
+
 
 
 
@@ -179,25 +185,22 @@ function displayDogs(){
 
         <div class="dog-info">
 
-        <h2>${dog.Name}</h2>
+            <h2>${dog.Name}</h2>
 
-        <h3>${dog.Breed}</h3>
+            <h3>${dog.Breed}</h3>
 
+            <p>
+            ${dog.Size} |
+            ${dog.Age} |
+            ${dog.Sex}
+            </p>
 
-        <p>
-        ${dog.Size} |
-        ${dog.Age} |
-        ${dog.Sex}
-        </p>
-
-
-        <p>
-        Energy: ${dog.Energy}<br>
-        Good with children: ${dog.Children}<br>
-        Good with dogs: ${dog.Dogs}<br>
-        Good with cats: ${dog.Cats}
-        </p>
-
+            <p>
+            Energy: ${dog.Energy}<br>
+            Good with children: ${dog.Children}<br>
+            Good with dogs: ${dog.Dogs}<br>
+            Good with cats: ${dog.Cats}
+            </p>
 
         </div>
 
