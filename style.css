@@ -163,12 +163,14 @@ header p {
 
 
 
-/* Dog Details */
+/* Dog Information */
 
 .dog-info {
 
     padding: 22px;
     flex: 1;
+    display: flex;
+    flex-direction: column;
 
 }
 
@@ -230,7 +232,7 @@ header p {
 
     width: 100%;
     padding: 12px;
-    margin-top: 10px;
+    margin-top: auto;
     border: none;
     border-radius: 8px;
     background: #2F1169;
