@@ -17,13 +17,10 @@ async function loadDogs(){
     const csv = await response.text();
 
 
-    const rows = csv
-        .split("\n")
-        .map(row => row.split(","));
+    const rows = parseCSV(csv);
 
 
-    const headers = rows[0].map(h => h.trim());
-
+    const headers = rows[0].map(header => header.trim());
 
 
     dogs = rows.slice(1)
@@ -36,8 +33,7 @@ async function loadDogs(){
 
             headers.forEach((header,index)=>{
 
-                dog[header] =
-                row[index]?.replace(/"/g,"").trim() || "";
+                dog[header] = row[index]?.trim() || "";
 
             });
 
@@ -63,6 +59,88 @@ async function loadDogs(){
 
 
 
+function parseCSV(text){
+
+
+    const rows = [];
+
+    let row = [];
+
+    let value = "";
+
+    let insideQuotes = false;
+
+
+
+    for(let char of text){
+
+
+        if(char === '"'){
+
+            insideQuotes = !insideQuotes;
+
+        }
+
+
+        else if(char === "," && !insideQuotes){
+
+            row.push(value);
+
+            value="";
+
+        }
+
+
+        else if((char === "\n" || char === "\r") && !insideQuotes){
+
+
+            if(value || row.length){
+
+                row.push(value);
+
+                rows.push(row);
+
+            }
+
+
+            row=[];
+
+            value="";
+
+
+        }
+
+
+        else{
+
+            value += char;
+
+        }
+
+
+    }
+
+
+
+    if(value || row.length){
+
+        row.push(value);
+
+        rows.push(row);
+
+    }
+
+
+
+    return rows;
+
+
+}
+
+
+
+
+
 function populateBreedFilter(){
 
 
@@ -73,7 +151,9 @@ function populateBreedFilter(){
     const breeds =
     [...new Set(
         dogs.map(dog=>dog.Breed)
+        .filter(Boolean)
     )];
+
 
 
     breeds.forEach(breed=>{
@@ -99,10 +179,11 @@ function populateBreedFilter(){
 
 
 
+
 function displayDogs(list){
 
 
-    dogContainer.innerHTML="";
+    dogContainer.innerHTML = "";
 
 
 
@@ -122,13 +203,20 @@ function displayDogs(list){
 
 
 
-        card.innerHTML=`
+        card.innerHTML = `
+
 
         <div class="photo-box">
 
-            <img src="${dog.Photo}" alt="${dog.Name}">
+
+            <img 
+            src="${dog.Photo}" 
+            alt="${dog.Name}"
+            >
+
 
         </div>
+
 
 
         <div class="dog-info">
@@ -136,39 +224,80 @@ function displayDogs(list){
 
             <h2>${dog.Name}</h2>
 
+
             <h3>${dog.Breed}</h3>
+
 
 
             <div class="badges">
 
-                <span class="badge">🐾 ${dog.Size}</span>
 
-                <span class="badge">🐾 ${dog.Age}</span>
+                <span class="badge">
+                🐾 ${dog.Size}
+                </span>
 
-                <span class="badge">🐾 ${dog.Sex}</span>
 
-                <span class="badge">🐾 ${dog.Energy} energy</span>
+                <span class="badge">
+                🐾 ${dog.Age}
+                </span>
+
+
+                <span class="badge">
+                🐾 ${dog.Sex}
+                </span>
+
+
+                <span class="badge">
+                🐾 ${dog.Energy} energy
+                </span>
+
 
             </div>
 
 
+
             <button class="meet-button">
 
-                Meet ${dog.Name}
+            Meet ${dog.Name}
 
             </button>
 
 
+
         </div>
+
 
         `;
 
 
 
+
+        const image =
+        card.querySelector("img");
+
+
+
+        image.onerror = function(){
+
+
+            this.style.display="none";
+
+
+            this.parentElement.innerHTML =
+            "Photo coming soon";
+
+
+        };
+
+
+
+
         card.querySelector(".meet-button")
-        .onclick = function(){
+        .onclick=function(){
+
 
             openProfile(dog);
+
 
         };
 
@@ -182,6 +311,8 @@ function displayDogs(list){
 
 
 }
+
+
 
 
 
@@ -203,45 +334,57 @@ function openProfile(dog){
     content.innerHTML = `
 
 
+
     <img src="${dog.Photo}" alt="${dog.Name}">
+
 
 
     <h2>${dog.Name}</h2>
 
+
     <h3>${dog.Breed}</h3>
+
 
 
     <h3>Description</h3>
 
     <p>
-    ${dog.Description}
+    ${dog.Description || "Information coming soon."}
     </p>
+
 
 
 
     <h3>Personality</h3>
 
     <p>
-    ${dog.Personality}
+    ${dog.Personality || "Information coming soon."}
     </p>
+
 
 
 
     <h3>Ideal Home</h3>
 
     <p>
-    ${dog.IdealHome}
+    ${dog.IdealHome || "Information coming soon."}
     </p>
+
 
 
 
     <h3>Good With</h3>
 
     <p>
+
     Children: ${dog.Children}<br>
+
     Dogs: ${dog.Dogs}<br>
+
     Cats: ${dog.Cats}
+
     </p>
+
 
 
     `;
@@ -256,13 +399,17 @@ function openProfile(dog){
 
 
 
+
 document.querySelector(".close")
 .onclick=function(){
+
 
     document.getElementById("profileModal")
     .style.display="none";
 
+
 };
+
 
 
 
@@ -273,6 +420,7 @@ window.onclick=function(event){
 
     const modal =
     document.getElementById("profileModal");
+
 
 
     if(event.target === modal){
@@ -288,7 +436,9 @@ window.onclick=function(event){
 
 
 
+
 function filterDogs(){
+
 
 
     const breed =
@@ -362,21 +512,27 @@ function filterDogs(){
 
 
 
+
+
 function clearFilters(){
 
 
     document.querySelectorAll("select")
     .forEach(select=>{
 
+
         select.value="";
 
+
     });
+
 
 
     displayDogs(dogs);
 
 
 }
+
 
 
 
@@ -393,6 +549,7 @@ document.querySelectorAll("select")
 
 
 });
+
 
 
 
