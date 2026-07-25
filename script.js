@@ -6,6 +6,29 @@ const dogContainer = document.getElementById("dogContainer");
 const dogCount = document.getElementById("dogCount");
 
 
+// Convert Google Drive links into displayable images
+function convertGoogleDriveImage(url){
+
+    if(!url){
+        return "";
+    }
+
+    if(url.includes("drive.google.com/file/d/")){
+
+        const id = url
+            .split("/d/")[1]
+            .split("/")[0];
+
+        return `https://drive.google.com/uc?export=view&id=${id}`;
+
+    }
+
+    return url;
+
+}
+
+
+// CSV reader that handles commas inside descriptions
 function parseCSV(text){
 
     const rows = [];
@@ -18,15 +41,10 @@ function parseCSV(text){
 
         const char = text[i];
 
+
         if(char === '"'){
 
-            if(insideQuotes && text[i+1] === '"'){
-                value += '"';
-                i++;
-            }
-            else{
-                insideQuotes = !insideQuotes;
-            }
+            insideQuotes = !insideQuotes;
 
         }
         else if(char === "," && !insideQuotes){
@@ -58,8 +76,10 @@ function parseCSV(text){
 
 
     if(value || row.length){
+
         row.push(value);
         rows.push(row);
+
     }
 
 
@@ -78,26 +98,43 @@ async function loadDogs(){
     const rows = parseCSV(csv);
 
 
-    const headers = rows[0].map(h => h.trim());
+    const headers = rows[0]
+        .map(header => header.trim());
 
 
     dogs = rows.slice(1)
-    .map(row=>{
+        .filter(row => row.length)
+        .map(row => {
 
-        let dog={};
+
+            let dog = {};
 
 
-        headers.forEach((header,index)=>{
+            headers.forEach((header,index)=>{
 
-            dog[header] =
-            row[index]?.trim() || "";
+
+                let value =
+                row[index]?.trim() || "";
+
+
+                if(header === "Photo"){
+
+                    value =
+                    convertGoogleDriveImage(value);
+
+                }
+
+
+                dog[header] = value;
+
+
+            });
+
+
+            return dog;
+
 
         });
-
-
-        return dog;
-
-    });
 
 
     console.log("Dogs loaded:", dogs);
@@ -111,41 +148,48 @@ async function loadDogs(){
 
 function displayDogs(){
 
-    dogContainer.innerHTML="";
+    dogContainer.innerHTML = "";
 
 
-    const available =
+    const availableDogs =
     dogs.filter(dog =>
         dog.Status.toLowerCase() === "available"
     );
 
 
     dogCount.textContent =
-    `${available.length} dog${available.length === 1 ? "" : "s"} available`;
+    `${availableDogs.length} dog${availableDogs.length === 1 ? "" : "s"} available`;
 
 
 
-    available.forEach(dog=>{
+    availableDogs.forEach(dog=>{
 
 
-        const card=document.createElement("div");
+        const card =
+        document.createElement("div");
 
-        card.className="dog-card";
+
+        card.className = "dog-card";
 
 
-        card.innerHTML=`
+        card.innerHTML = `
 
         <img src="${dog.Photo}" alt="${dog.Name}">
 
+
+        <div class="dog-info">
+
         <h2>${dog.Name}</h2>
 
-        <p>${dog.Breed}</p>
+        <h3>${dog.Breed}</h3>
+
 
         <p>
         ${dog.Size} |
         ${dog.Age} |
         ${dog.Sex}
         </p>
+
 
         <p>
         Energy: ${dog.Energy}<br>
@@ -154,14 +198,19 @@ function displayDogs(){
         Good with cats: ${dog.Cats}
         </p>
 
+
+        </div>
+
         `;
 
 
         dogContainer.appendChild(card);
 
+
     });
 
 }
+
 
 
 loadDogs();
