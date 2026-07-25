@@ -5,39 +5,103 @@ let dogs = [];
 const dogContainer = document.getElementById("dogContainer");
 const dogCount = document.getElementById("dogCount");
 
-async function loadDogs() {
+
+function parseCSV(text){
+
+    const rows = [];
+    let row = [];
+    let value = "";
+    let insideQuotes = false;
+
+
+    for(let i = 0; i < text.length; i++){
+
+        const char = text[i];
+
+        if(char === '"'){
+
+            if(insideQuotes && text[i+1] === '"'){
+                value += '"';
+                i++;
+            }
+            else{
+                insideQuotes = !insideQuotes;
+            }
+
+        }
+        else if(char === "," && !insideQuotes){
+
+            row.push(value);
+            value = "";
+
+        }
+        else if((char === "\n" || char === "\r") && !insideQuotes){
+
+            if(value || row.length){
+
+                row.push(value);
+                rows.push(row);
+
+            }
+
+            row = [];
+            value = "";
+
+        }
+        else{
+
+            value += char;
+
+        }
+
+    }
+
+
+    if(value || row.length){
+        row.push(value);
+        rows.push(row);
+    }
+
+
+    return rows;
+
+}
+
+
+
+async function loadDogs(){
 
     const response = await fetch(sheetURL);
+
     const csv = await response.text();
 
-    const rows = csv.split(/\r?\n/);
+    const rows = parseCSV(csv);
 
-    const headers = rows[0]
-        .split(",")
-        .map(header => header.trim());
+
+    const headers = rows[0].map(h => h.trim());
 
 
     dogs = rows.slice(1)
-        .filter(row => row.trim() !== "")
-        .map(row => {
+    .map(row=>{
 
-            const values = row.split(",");
+        let dog={};
 
-            let dog = {};
 
-            headers.forEach((header,index)=>{
+        headers.forEach((header,index)=>{
 
-                dog[header] =
-                values[index]?.trim() || "";
-
-            });
-
-            return dog;
+            dog[header] =
+            row[index]?.trim() || "";
 
         });
 
 
-    console.log(dogs);
+        return dog;
+
+    });
+
+
+    console.log("Dogs loaded:", dogs);
+
 
     displayDogs();
 
@@ -47,29 +111,29 @@ async function loadDogs() {
 
 function displayDogs(){
 
-    dogContainer.innerHTML = "";
+    dogContainer.innerHTML="";
 
-    const availableDogs =
+
+    const available =
     dogs.filter(dog =>
         dog.Status.toLowerCase() === "available"
     );
 
 
-    dogCount.innerHTML =
-    `${availableDogs.length} dog${availableDogs.length !== 1 ? "s" : ""} available`;
+    dogCount.textContent =
+    `${available.length} dog${available.length === 1 ? "" : "s"} available`;
 
 
-    availableDogs.forEach(dog => {
+
+    available.forEach(dog=>{
 
 
-        const card =
-        document.createElement("div");
-
+        const card=document.createElement("div");
 
         card.className="dog-card";
 
 
-        card.innerHTML = `
+        card.innerHTML=`
 
         <img src="${dog.Photo}" alt="${dog.Name}">
 
