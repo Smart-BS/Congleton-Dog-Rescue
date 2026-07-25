@@ -6,32 +6,28 @@ const dogContainer = document.getElementById("dogContainer");
 const dogCount = document.getElementById("dogCount");
 
 
-// Simple CSV parser
 function parseCSV(text) {
 
     const lines = text.split(/\r?\n/);
 
     return lines.map(line => {
 
-        const result = [];
+        const values = [];
         let current = "";
-        let quote = false;
+        let quotes = false;
 
-
-        for (let i = 0; i < line.length; i++) {
-
-            const char = line[i];
+        for (let char of line) {
 
             if (char === '"') {
-                quote = !quote;
-            }
-            else if (char === "," && !quote) {
 
-                result.push(current);
+                quotes = !quotes;
+
+            } else if (char === "," && !quotes) {
+
+                values.push(current);
                 current = "";
 
-            }
-            else {
+            } else {
 
                 current += char;
 
@@ -39,9 +35,9 @@ function parseCSV(text) {
 
         }
 
-        result.push(current);
+        values.push(current);
 
-        return result;
+        return values;
 
     });
 
@@ -55,11 +51,9 @@ async function loadDogs() {
 
     const csv = await response.text();
 
-
     const rows = parseCSV(csv);
 
-
-    const headers = rows[0].map(h => h.trim());
+    const headers = rows[0].map(x => x.trim());
 
 
     dogs = rows.slice(1)
@@ -74,13 +68,12 @@ async function loadDogs() {
 
             });
 
-
             return dog;
 
         });
 
 
-    console.log("Dogs loaded:", dogs);
+    console.log(dogs);
 
     displayDogs();
 
@@ -88,9 +81,7 @@ async function loadDogs() {
 
 
 
-
-function displayDogs() {
-
+function displayDogs(){
 
     dogContainer.innerHTML = "";
 
@@ -108,38 +99,19 @@ function displayDogs() {
     availableDogs.forEach(dog => {
 
 
-        console.log("Creating card for:", dog.Name);
-        console.log("Photo:", dog.Photo);
-
-
-
         const card = document.createElement("div");
 
         card.className = "dog-card";
 
 
+        card.innerHTML = `
 
-        const img = document.createElement("img");
-
-        img.src = dog.Photo;
-
-        img.alt = dog.Name;
-
-
-        img.onerror = () => {
-
-            img.src = "https://via.placeholder.com/400x260?text=No+Photo";
-
-        };
+        <div class="photo-box">
+            <img src="${dog.Photo}" alt="${dog.Name}">
+        </div>
 
 
-
-        const info = document.createElement("div");
-
-        info.className = "dog-info";
-
-
-        info.innerHTML = `
+        <div class="dog-info">
 
             <h2>${dog.Name}</h2>
 
@@ -158,12 +130,23 @@ function displayDogs() {
             Good with cats: ${dog.Cats}
             </p>
 
+        </div>
+
         `;
 
 
-        card.appendChild(img);
+        const image =
+        card.querySelector("img");
 
-        card.appendChild(info);
+
+        image.onerror = function(){
+
+            this.style.display = "none";
+
+            this.parentElement.innerHTML =
+            "<strong>Photo coming soon</strong>";
+
+        };
 
 
         dogContainer.appendChild(card);
@@ -172,7 +155,6 @@ function displayDogs() {
     });
 
 }
-
 
 
 loadDogs();
